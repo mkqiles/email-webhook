@@ -3,7 +3,7 @@ import { getLogStorageMode, getLogStore } from "@/lib/log-store";
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
-  const [log, storage] = await Promise.all([getLogStore(), getLogStorageMode()]);
+  const [log, storage] = await Promise.all([getLogStore().catch(v => v), getLogStorageMode()]);
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-zinc-100 px-6 py-16">

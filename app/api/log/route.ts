@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
-import { appendLogStore, getLogStore } from "@/lib/log-store";
+import {
+  appendLogStore,
+  getLogStorageMode,
+  getLogStore,
+} from "@/lib/log-store";
 
 function normalizePayload(payload: unknown) {
   if (payload && typeof payload === "object" && !Array.isArray(payload)) {
@@ -39,17 +43,22 @@ async function readRequestPayload(request: Request) {
 export async function POST(request: Request) {
   try {
     const payload = await readRequestPayload(request);
-    const entry = appendLogStore(payload);
+    const entry = await appendLogStore(payload);
 
     return NextResponse.json({
       message: "log appended",
+      storage: getLogStorageMode(),
       entry,
-      log: getLogStore(),
+      log: await getLogStore(),
     });
-  } catch {
+  } catch (error) {
     return NextResponse.json(
-      { message: "invalid request body" },
-      { status: 400 },
+      {
+        message: "failed to append log",
+        storage: getLogStorageMode(),
+        error: error instanceof Error ? error.message : "unknown error",
+      },
+      { status: 500 },
     );
   }
 }
